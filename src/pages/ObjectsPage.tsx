@@ -1,10 +1,9 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import ObjectCard from '../components/objects/ObjectCard';
-import Map from '../components/map/Map';
 import { useObjects } from '../hooks/useObjects';
 import { ObjectType } from '../types/ObjectType';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 // Fondo gris suave y elegante con imagen de fondo tipo mosaico (repetida)
@@ -40,6 +39,17 @@ const ObjectsPage: React.FC = () => {
 const { objects, loading }: { objects: ObjectType[]; loading: boolean } = useObjects();
 const navigate = useNavigate();
 
+// Maneja el cambio de filtros
+const handleFilterChange = (
+  e: React.ChangeEvent<HTMLSelectElement>,
+  filterKey: keyof Filters
+) => {
+  setFilters((prev) => ({
+    ...prev,
+    [filterKey]: e.target.value,
+  }));
+};
+
 
   const filteredObjects = objects.filter((object) => {
     const matchesSearch =
@@ -51,7 +61,14 @@ const navigate = useNavigate();
     const categoriaNombre =
       typeof object.categories === 'string'
         ? object.categories
-        : (object.categories && (object.categories.nombre || object.categories.name)) || '';
+        : (object.categories &&
+            typeof object.categories === 'object' &&
+            ('nombre' in object.categories
+              ? (object.categories as { nombre: string }).nombre
+              : 'name' in object.categories
+                ? (object.categories as { name: string }).name
+                : '')
+          ) || '';
 
     const matchesCategory = !filters.categories || categoriaNombre === filters.categories;
     const matchesLocation = !filters.location || (object.location || '').includes(filters.location);

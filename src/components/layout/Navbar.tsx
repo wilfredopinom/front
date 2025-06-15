@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import  { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import {  Plus, User, Shield, Settings, SquarePen, Logout,user, LogOut } from 'lucide-react';
+import {  Plus, User, Shield,  SquarePen, LogOut } from 'lucide-react';
 import { useClerk, useUser } from '@clerk/clerk-react';
 
 const Navbar = () => {
@@ -9,7 +9,7 @@ const Navbar = () => {
   const { signOut } = useClerk();
   const { isSignedIn, user } = useUser();
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
+  
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   // Cierra el menú al hacer click fuera

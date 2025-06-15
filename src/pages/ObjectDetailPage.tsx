@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useObjects } from '../hooks/useObjects';
 import { useUser } from '@clerk/clerk-react';
 import { useAuth } from '@clerk/clerk-react';
-import { MapPin, Calendar, User, MessageSquare, Flag, Shield, Mail, Phone, ExternalLink, ArrowLeft } from 'lucide-react';
+import { MapPin, Calendar, User,Flag, Shield, Mail, Phone, ExternalLink, ArrowLeft } from 'lucide-react';
 import ShareMenu from '../components/objects/ShareMenu';
 import MessageSystem from '../components/messages/MessageSystem';
 import FeedbackForm from '../components/feedback/FeedbackForm';
@@ -24,6 +24,7 @@ interface Claim {
 }
 
 interface Publisher {
+  clerk_id: string | null | undefined;
   id: string;
   name: string;
   avatar?: string;
@@ -67,13 +68,14 @@ interface ObjectDetail {
   contactInfo?: ContactInfo;
   claimer?: Claimer;
   claims: Claim[];
+  entregado_recuperado?: boolean; // <-- Added property
 }
 
 const ObjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { claimObject, deleteClaim } = useObjects();
+  const { claimObject } = useObjects();
   const { user } = useUser();
   const { getToken } = useAuth();
   const [showMessages, setShowMessages] = useState(false);
@@ -85,7 +87,7 @@ const ObjectDetailPage: React.FC = () => {
   const [object, setObject] = useState<ObjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [zoomedImage, setZoomedImage] = useState <string|null>(null);
+
   const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -155,9 +157,14 @@ const ObjectDetailPage: React.FC = () => {
         const errorData = await response.json();
         setClaimError(errorData.message || 'Error al actualizar el objeto tras reclamar');
       }
-    } catch (error: any) {
-      setClaimError(error?.message || 'Error al reclamar el objeto. Por favor, inténtalo de nuevo.');
-      console.error('Error claiming object:', error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setClaimError(error.message || 'Error al reclamar el objeto. Por favor, inténtalo de nuevo.');
+        console.error('Error claiming object:', error);
+      } else {
+        setClaimError('Error al reclamar el objeto. Por favor, inténtalo de nuevo.');
+        console.error('Error claiming object:', error);
+      }
     }
   };
 
@@ -184,7 +191,7 @@ const ObjectDetailPage: React.FC = () => {
         try {
           const errorData = await response.json();
           errorMsg = errorData.message || errorMsg;
-        } catch (e) {
+        } catch {
           // Si no es JSON, usa el statusText
           errorMsg = response.statusText || errorMsg;
         }
@@ -219,7 +226,7 @@ const ObjectDetailPage: React.FC = () => {
         try {
           const errorData = await response.json();
           errorMsg = errorData.message || errorMsg;
-        } catch (e) {
+        } catch {
           errorMsg = response.statusText || errorMsg;
         }
         toast.error(errorMsg);
@@ -257,7 +264,7 @@ const ObjectDetailPage: React.FC = () => {
         try {
           const errorData = await response.json();
           errorMsg = errorData.message || errorMsg;
-        } catch (e) {
+        } catch {
           // Si no es JSON, usa el statusText
           errorMsg = response.statusText || errorMsg;
         }
@@ -296,7 +303,7 @@ const ObjectDetailPage: React.FC = () => {
         try {
           const errorData = await response.json();
           errorMsg = errorData.message || errorMsg;
-        } catch (e) {
+        } catch {
           errorMsg = response.statusText || errorMsg;
         }
         toast.error(errorMsg);
@@ -403,7 +410,7 @@ const ObjectDetailPage: React.FC = () => {
 
   // Determina si vienes del perfil
   const fromProfile =
-    (location.state && (location.state as any).fromProfile) ||
+    (location.state && (location.state as { fromProfile?: boolean }).fromProfile) ||
     sessionStorage.getItem('fromProfile') === 'true';
 
   // NUEVO: Determina si el objeto es "perdido" o "encontrado"
@@ -466,21 +473,6 @@ const ObjectDetailPage: React.FC = () => {
     }
   }
 
-  function getStatusColor(status: string) {
-    switch (status) {
-      case 'perdido':
-      case 'pendiente_recuperacion':
-      case 'recuperado':
-        return 'bg-pink-600 text-white';
-      case 'encontrado':
-      case 'pendiente_entrega':
-      case 'entregado':
-      case 'reclamado':
-        return 'bg-blue-600 text-white';
-      default:
-        return 'bg-gray-500 text-white';
-    }
-  }
 
   function getCurrentStatusColor(status: string) {
     switch (status) {
@@ -817,9 +809,9 @@ const ObjectDetailPage: React.FC = () => {
                       </h2>
                       <div className="flex items-center space-x-4">
                         {object.claimer && (object.claimer.id || object.claimer.name) ? (
-                          object.claimer.avatar || object.claimer.imageUrl ? (
+                          object.claimer.avatar ? (
                             <img
-                              src={object.claimer.avatar || object.claimer.imageUrl}
+                              src={object.claimer.avatar}
                               alt={object.claimer.name || (object.status === 'perdido' ? 'Atopador' : 'Reclamante')}
                               className="w-12 h-12 rounded-full object-cover"
                               onError={(e) => {

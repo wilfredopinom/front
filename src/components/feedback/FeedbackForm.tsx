@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, MessageSquare } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface FeedbackFormProps {
@@ -21,6 +21,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onClose }) => {
       console.log('Feedback enviado:', feedback);
       toast.success('¡Gracias por tu feedback!');
       onClose();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Error al enviar el feedback');
     }

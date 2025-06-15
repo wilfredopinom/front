@@ -1,10 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, SignIn, SignUp, useUser } from '@clerk/clerk-react';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
-
 import HomePage from './pages/HomePage';
 import ObjectsPage from './pages/ObjectsPage';
 import ObjectDetailPage from './pages/ObjectDetailPage';
@@ -56,12 +55,11 @@ const backgroundStyle: React.CSSProperties = {
 // New component for Providers and routes
 function AppRoutes() {
   // Now you can use useNavigate here
-  const navigate = useNavigate();
+  
 
   return (
     <ClerkProvider
       publishableKey={clerkPubKey}
-      navigate={to => navigate(to)}
     >
       <ObjectsProvider>
         {/* Fondo blanco */}
