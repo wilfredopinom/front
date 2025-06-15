@@ -5,19 +5,19 @@ import HeroImage from '../components/ui/HeroImage';
 import StatCard from '../components/ui/StatCard';
 import FeatureCard from '../components/ui/FeatureCard';
 import { useObjects } from '../hooks/useObjects';
+import StatusBadge from '../components/ui/StatusBadge';
 
 const HomePage: React.FC = () => {
   const { objects } = useObjects();
-  const policeObjects = objects.filter(obj => obj.isPoliceStation).slice(0, 3);
+  const ObjetosRecientes = objects
+    .filter(obj => obj.status === 'encontrado' || obj.status === 'entregado' || obj.status === 'reclamado' || obj.status === 'perdido')
+    .slice(0, 6);
+
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-blue-900 to-purple-900 text-white relative overflow-hidden">
+    <div className="min-h-screen  text-white relative overflow-hidden">
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
+     
 
       {/* Hero Section */}
       <section className="relative">
@@ -41,7 +41,7 @@ const HomePage: React.FC = () => {
                 </Link>
                 <Link
                   to="/publicar"
-                  className="glass-card inline-flex justify-center items-center px-6 py-3 hover:bg-white/20 transition-all duration-300"
+                  className="glass-card inline-flex justify-center items-center px-6 py-3 hover:bg-white/20 transition-all duration-300 hover-glow"
                 >
                   <MapPin className="w-5 h-5 mr-2" />
                   Publicar objeto
@@ -57,23 +57,23 @@ const HomePage: React.FC = () => {
 
       {/* Stats Section */}
       <section className="py-16 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="glass-card p-8 hover-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 " >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 ">
+            <div className="glass-card p-8 hover-card hover-glow ">
               <StatCard
                 icon={<MapPin className="w-12 h-12 text-blue-400" />}
                 number="2,500+"
                 label="Objetos encontrados"
               />
             </div>
-            <div className="glass-card p-8 hover-card">
+            <div className="glass-card p-8 hover-card hover-glow">
               <StatCard
-                icon={<Users className="w-12 h-12 text-purple-400" />}
+                icon={<Users className="w-12 h-12 text-green-400" />}
                 number="5,000+"
                 label="Usuarios registrados"
               />
             </div>
-            <div className="glass-card p-8 hover-card">
+            <div className="glass-card p-8 hover-card hover-glow">
               <StatCard
                 icon={<Clock className="w-12 h-12 text-pink-400" />}
                 number="75%"
@@ -85,30 +85,32 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Police Objects Section */}
-      {policeObjects.length > 0 && (
+      {ObjetosRecientes.length > 0 && (
         <section className="py-16 relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="section-title">Objetos en Comisarías</h2>
+              <h2 className="section-title">Recientes</h2>
               <p className="mt-4 text-lg text-blue-200 max-w-3xl mx-auto">
-                Últimos objetos encontrados y custodiados en comisarías de policía de Galicia
+                Últimos objetos encontrados y publicados en nuestra Web
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {policeObjects.map((object) => (
+              {ObjetosRecientes.map((object) => (
                 <div
                   key={object.id}
-                  className="glass-card overflow-hidden hover-card"
+                  className="glass-card overflow-hidden hover-card hover-glow"
                 >
                   {object.images && object.images.length > 0 && (
                     <div className="aspect-w-16 aspect-h-9">
                       <img
-                        src={object.images[0]}
+                        src={object.images[0].url}
                         alt={object.title}
                         className="w-full h-48 object-cover"
                       />
-                    </div>
+          
+      </div>
+                    
                   )}
                   
                   <div className="p-6">
@@ -121,11 +123,11 @@ const HomePage: React.FC = () => {
                     </p>
                     
                     <div className="flex items-center justify-between">
-                      <span className="glass-card px-2.5 py-0.5 rounded-full text-xs font-medium text-blue-300">
-                        {object.category}
+                      <span className="glass-card px-2.5 py-0.5 rounded-full text-xs font-medium text-blue-300 hover-glow">
+                        {object.categories?.name || 'Sin categoría'}
                       </span>
                       
-                      <span className={`glass-card px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`glass-card px-2.5 py-0.5 rounded-full text-xs font-medium hover-glow ${
                         object.status === 'encontrado' ? 'text-green-400' :
                         object.status === 'reclamado' ? 'text-yellow-400' :
                         'text-purple-400'
@@ -162,42 +164,42 @@ const HomePage: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="glass-card p-8 hover-card">
+            <div className="glass-card p-8 hover-card hover-glow">
               <FeatureCard
                 icon={<MapPin className="w-10 h-10 text-blue-400" />}
                 title="Publica objetos encontrados"
                 description="Sube fotos, indica la ubicación y describe los objetos encontrados para ayudar a sus dueños."
               />
             </div>
-            <div className="glass-card p-8 hover-card">
+            <div className="glass-card p-8 hover-card hover-glow">
               <FeatureCard
                 icon={<Search className="w-10 h-10 text-purple-400" />}
                 title="Busca objetos perdidos"
                 description="Utiliza filtros y el mapa para localizar tus objetos perdidos rápidamente."
               />
             </div>
-            <div className="glass-card p-8 hover-card">
+            <div className="glass-card p-8 hover-card hover-glow">
               <FeatureCard
                 icon={<Shield className="w-10 h-10 text-pink-400" />}
                 title="Colaboración con autoridades"
                 description="Trabajamos con policía local y establecimientos para una red de búsqueda más efectiva."
               />
             </div>
-            <div className="glass-card p-8 hover-card">
+            <div className="glass-card p-8 hover-card hover-glow">
               <FeatureCard
                 icon={<Clock className="w-10 h-10 text-blue-400" />}
                 title="Actualizaciones en tiempo real"
                 description="Recibe notificaciones instantáneas cuando haya novedades sobre tus objetos."
               />
             </div>
-            <div className="glass-card p-8 hover-card">
+            <div className="glass-card p-8 hover-card hover-glow">
               <FeatureCard
                 icon={<Users className="w-10 h-10 text-purple-400" />}
                 title="Comunidad de ayuda"
                 description="Conecta con personas cerca de ti dispuestas a ayudar a encontrar tus pertenencias."
               />
             </div>
-            <div className="glass-card p-8 hover-card">
+            <div className="glass-card p-8 hover-card hover-glow">
               <FeatureCard
                 icon={<MapPin className="w-10 h-10 text-pink-400" />}
                 title="Mapa interactivo"
@@ -211,7 +213,7 @@ const HomePage: React.FC = () => {
       {/* CTA Section */}
       <section className="py-16 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="glass-card p-12 hover-glow">
+          <div className="glass-card p-12 hover-glow hover-glow">
             <h2 className="text-3xl font-bold mb-6 gradient-text">
               ¿Has perdido o encontrado algo?
             </h2>
@@ -228,7 +230,7 @@ const HomePage: React.FC = () => {
               </Link>
               <Link
                 to="/objetos"
-                className="glass-card inline-flex justify-center items-center px-6 py-3 hover:bg-white/20 transition-all duration-300"
+                className="glass-card inline-flex justify-center items-center px-6 py-3 hover:bg-white/20 transition-all duration-300 hover-glow"
               >
                 Ver objetos
               </Link>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useObjects } from '../hooks/useObjects';
 import { ObjectType } from '../types/ObjectType';
+import StatusBadge from '../components/ui/StatusBadge';
 
 const LostObjectsByMonthPage: React.FC = () => {
   const { monthId } = useParams<{ monthId: string }>();
@@ -76,6 +77,10 @@ const LostObjectsByMonthPage: React.FC = () => {
                       alt={object.title}
                       className="w-full h-48 object-cover"
                     />
+                     <div className="absolute top-2 right-2">
+          <StatusBadge status={object.status} />
+        </div>
+      
                   </div>
                 )}
                 
@@ -94,7 +99,7 @@ const LostObjectsByMonthPage: React.FC = () => {
                   
                   <div className="flex items-center justify-between">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {object.category}
+                      {object.categories}
                     </span>
                     
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

@@ -31,27 +31,8 @@ const PoliceStationsPage: React.FC = () => {
       id: '2025-01', 
       label: 'Enero 2025',
       monthlyReport: '/reports/2025-01-police-report.pdf'
-    },
-    { 
-      id: '2024-12', 
-      label: 'Diciembre 2024',
-      monthlyReport: '/reports/2024-12-police-report.pdf'
-    },
-    { 
-      id: '2024-11', 
-      label: 'Noviembre 2024',
-      monthlyReport: '/reports/2024-11-police-report.pdf'
-    },
-    { id: '2024-10', label: 'Octubre 2024', monthlyReport: '' },
-    { id: '2024-09', label: 'Septiembre 2024', monthlyReport: '' },
-    { id: '2024-08', label: 'Agosto 2024', monthlyReport: '' },
-    { id: '2024-07', label: 'Julio 2024', monthlyReport: '' },
-    { id: '2024-06', label: 'Junio 2024', monthlyReport: '' },
-    { id: '2024-05', label: 'Mayo 2024', monthlyReport: '' },
-    { id: '2024-04', label: 'Abril 2024', monthlyReport: '' },
-    { id: '2024-03', label: 'Marzo 2024', monthlyReport: '' },
-    { id: '2024-02', label: 'Febrero 2024', monthlyReport: '' },
-    { id: '2024-01', label: 'Enero 2024', monthlyReport: '' }
+    }
+    
   ];
 
   const policeStations = [

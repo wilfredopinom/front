@@ -6,30 +6,34 @@ interface StatusBadgeProps {
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const getStatusStyles = () => {
-    switch (status) {
-      case 'encontrado':
-        return 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border-green-500/30';
-      case 'reclamado':
-        return 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-400 border-yellow-500/30';
-      case 'entregado':
-        return 'bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-blue-400 border-blue-500/30';
-      default:
-        return 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-400 border-gray-500/30';
-    }
-  };
+ switch (status) {
+    case 'perdido':
+      return 'bg-red-400/100 to-red-600/20 text-red-900 border-red-500/30';
+    case 'encontrado':
+      return 'bg-orange-400 text-orange-900 border-orange-400/30';
+    case 'entregado':
+      return 'bg-green-500 text-green-900 border-green-500/30';
+    case 'reclamado':
+      return 'bg-white text-gray-900 border-gray-300'; // fondo blanco con texto oscuro y borde gris
+    default:
+      return 'bg-gray-500/20 to-slate-500/20 text-gray-400 border-gray-500/30';
+  }
+};
 
   const getStatusText = () => {
-    switch (status) {
-      case 'encontrado':
-        return 'Encontrado';
-      case 'reclamado':
-        return 'Reclamado';
-      case 'entregado':
-        return 'Entregado';
-      default:
-        return status;
-    }
-  };
+  switch (status) {
+    case 'perdido':
+      return 'Perdido';
+    case 'encontrado':
+      return 'Encontrado';
+    case 'entregado':
+      return 'Entregado';
+    case 'reclamado':
+      return 'Reclamado';
+    default:
+      return status;
+  }
+};
 
   return (
     <span 

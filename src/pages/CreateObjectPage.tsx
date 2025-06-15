@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, MapPin, X } from 'lucide-react';
 import Map from '../components/map/Map';
-import { useCreateObject } from '../hooks/useCreateObject';
+import { useAuth } from "@clerk/clerk-react";
 
 const CreateObjectPage: React.FC = () => {
   const navigate = useNavigate();
-  const { createObject, loading } = useCreateObject();
-  
+  const { getToken } = useAuth();
+  const [ loading, setLoading ] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -15,7 +15,8 @@ const CreateObjectPage: React.FC = () => {
     location: '',
     contactPhone: '',
     contactEmail: '',
-    isPoliceStation: false
+    isPoliceStation: false,
+    status: '', // Nuevo campo status, valor por defecto
   });
   
   const [images, setImages] = useState<string[]>([]);
@@ -38,21 +39,13 @@ const CreateObjectPage: React.FC = () => {
     }
   };
   
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: checked
-    });
-  };
   
+  const [files, setFiles] = useState<File[]>([]);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    
-    // Simulating image upload - in a real app we would upload to a server/storage
-    Array.from(files).forEach(file => {
-      // Create object URL for preview (in production, you would upload to server)
+    const selectedFiles = e.target.files;
+    if (!selectedFiles) return;
+    setFiles(prev => [...prev, ...Array.from(selectedFiles)]);
+    Array.from(selectedFiles).forEach(file => {
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
@@ -61,18 +54,18 @@ const CreateObjectPage: React.FC = () => {
       };
       reader.readAsDataURL(file);
     });
-  };
-  
+  }
+
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
   
   const handleMapClick = (lat: number, lng: number) => {
     setCoordinates({ lat, lng });
-    // You would typically use a reverse geocoding service here
+    // En vez de poner "Lat: ...", pon una URL de Google Maps o las coordenadas en formato "lat,lng"
     setFormData(prev => ({
       ...prev,
-      location: `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`
+      location: `${lat},${lng}`
     }));
   };
   
@@ -103,48 +96,75 @@ const CreateObjectPage: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  setLoading(true);
+
+  const token = await getToken();
+  if (!token) {
+    setErrors({ submit: 'No hay sesión activa. Por favor, inicia sesión.' });
+    setLoading(false);
+    return;
+  }
+
+  const formDataToSend = new FormData();
+  formDataToSend.append('title', formData.title);
+  formDataToSend.append('description', formData.description);
+  formDataToSend.append('categories', formData.category);
+  formDataToSend.append('location', formData.location);
+  formDataToSend.append('status', formData.status); // Enviar status
+
+  files.forEach((file) => {
+    formDataToSend.append('images', file);
+  });
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL_BASE}/objetos`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formDataToSend,
+    });
+
+    if (!response.ok) {
+      let errorMsg = 'Error al publicar el objeto';
+      try {
+        const errorData = await response.json();
+        errorMsg = errorData.message || errorMsg;
+      } catch {
+        // Intentionally ignored: response is not JSON or has no message
+      }
+      throw new Error(errorMsg);
     }
-    
-    const objectData = {
-      ...formData,
-      images,
-      coordinates,
-      status: 'encontrado' as const,
-      date: new Date().toISOString()
-    };
-    
-    try {
-      const newObjectId = await createObject(objectData);
-      navigate(`/objetos/${newObjectId}`);
-    } catch (error) {
-      console.error('Error creating object:', error);
-      setErrors({
-        submit: 'Ha ocurrido un error al publicar el objeto. Por favor, inténtalo de nuevo.'
-      });
+
+    // Redirige al listado tras publicar
+    navigate('/objetos');
+  } catch (error: unknown) {
+    let errorMessage = 'Ha ocurrido un error al publicar el objeto.';
+    if (error instanceof Error) {
+      errorMessage = error.message || errorMessage;
     }
-  };
+    setErrors({ submit: errorMessage });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-blue-900 to-purple-900 text-white relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
-
+    <div >
+      {/* Fondo animado */}
+      
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-        <div className="glass-card overflow-hidden">
+        <div className="glass-card overflow-hidden hover-glow">
           <div className="p-8">
-            <h1 className="page-title mb-8">Publicar objeto encontrado</h1>
+            <h1 className="page-title mb-8">Publicar un objeto</h1>
             
             {errors.submit && (
-              <div className="mb-6 glass-card bg-red-500/10 border-red-500/30 text-red-400 p-4 rounded-xl">
+              <div className="mb-6 glass-card bg-red-500/10 border-red-500/30 text-red-400 p-4 rounded-xl hover-glow">
                 {errors.submit}
               </div>
             )}
@@ -209,16 +229,34 @@ const CreateObjectPage: React.FC = () => {
                         onChange={handleChange}
                       >
                         <option value="" className="bg-gray-900">Seleccionar categoría</option>
-                        <option value="electrónica" className="bg-gray-900">Electrónica</option>
-                        <option value="documentos" className="bg-gray-900">Documentos</option>
-                        <option value="ropa" className="bg-gray-900">Ropa</option>
-                        <option value="accesorios" className="bg-gray-900">Accesorios</option>
-                        <option value="mascotas" className="bg-gray-900">Mascotas</option>
-                        <option value="otros" className="bg-gray-900">Otros</option>
+                        <option value="Documentos" className="bg-gray-900">Documentos</option>
+                        <option value="Ropa y Accesorios" className="bg-gray-900">Ropa y Accesorios</option>
+                        <option value="Llaves" className="bg-gray-900">Llaves</option>
+                        <option value="Mascotas" className="bg-gray-900">Mascotas</option>
+                        <option value="Otros" className="bg-gray-900">Otros</option>
+                        <option value="Electrónicos" className="bg-gray-900">Electrónicos</option>
+                        <option value="Vehículos" className="bg-gray-900">Vehículos</option>
                       </select>
                       {errors.category && (
                         <p className="mt-2 text-sm text-red-400">{errors.category}</p>
                       )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="status" className="block text-sm font-medium text-blue-300 mb-1">
+                        Estado del objeto <span className="text-pink-400">*</span>
+                      </label>
+                      <select
+                        id="status"
+                        name="status"
+                        className="block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-xl transition-all duration-300"
+                        value={formData.status}
+                        onChange={handleChange}
+                      >
+                         <option value="" disabled hidden className="bg-gray-900">Selecciona un estado("Perdido" o "Encontrado")</option>
+                        <option value="perdido" className="bg-gray-900">Perdido</option>
+                        <option value="encontrado" className="bg-gray-900">Encontrado</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -252,18 +290,20 @@ const CreateObjectPage: React.FC = () => {
                       )}
                     </div>
                     
-                    <div className="glass-card h-[300px] rounded-xl overflow-hidden">
-                      <Map
-                        objects={[]}
-                        initialLocation={coordinates}
-                        zoom={15}
-                        height="300px"
-                        onMarkerClick={handleMapClick}
-                      />
-                    </div>
-                    <p className="text-sm text-blue-200">
-                      Haz clic en el mapa para marcar la ubicación exacta
-                    </p>
+                    {/* Previsualización del mapa si hay location */}
+                    {formData.location && (
+                      <div className="mt-4">
+                        <h4 className="text-blue-300 text-sm mb-2">Previsualización en el mapa:</h4>
+                        <iframe
+                          width="100%"
+                          height="300"
+                          loading="lazy"
+                          src={`https://www.google.com/maps?q=${encodeURIComponent(formData.location)}&output=embed`}
+                          style={{ border: 0, borderRadius: '12px' }}
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    )}
                   </div>
                 </div>
                 
@@ -328,7 +368,7 @@ const CreateObjectPage: React.FC = () => {
                 </div>
                 
                 {/* Submit Button */}
-                <div className="flex justify-end pt-6">
+              <div className="border-t border-gray-200 pt-6 flex justify-end">
                   <button
                     type="submit"
                     disabled={loading}

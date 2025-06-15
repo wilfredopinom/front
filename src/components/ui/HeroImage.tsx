@@ -2,9 +2,9 @@ import React from 'react';
 
 const HeroImage: React.FC = () => {
   return (
-    <div className="relative">
+    <div className="relative hover-glow">
       <img
-        src="https://images.pexels.com/photos/7605944/pexels-photo-7605944.jpeg"
+        src="../../../public/objetosPerdidos.webp"
         alt="Personas ayudándose en Galicia"
         className="rounded-lg shadow-xl max-h-[500px] w-full object-cover"
       />

@@ -47,26 +47,30 @@ export const ObjectsProvider: React.FC<ObjectsProviderProps> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchObjects = async () => {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setObjects(mockObjects.map(obj => ({
-          ...obj,
-          claimsCount: 0,
-          claims: [],
-          reports: []
-        })));
-      } catch (err) {
-        setError('Error al cargar los objetos');
-        console.error('Error fetching objects:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  const fetchObjects = async () => {
+    try {
+      setLoading(true);
 
-    fetchObjects();
-  }, []);
+      // Cambia '/api/objectos' por la ruta correcta:
+      const response = await fetch(`${import.meta.env.VITE_API_URL_BASE}/objetos`);
+      const data: ObjectType[] = await response.json();
+      const safeObjects = data.map(obj => ({
+        ...obj,
+        claims: Array.isArray(obj.claims) ? obj.claims : [],
+      }));
+      setObjects(safeObjects);
+    } catch (err) {
+      setError('Error al cargar los objetos');
+      console.error('Error fetching objects:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchObjects();
+}, []);
+
 
   const getObjectById = (id: string) => {
     return objects.find(object => object.id === id);
@@ -84,7 +88,7 @@ export const ObjectsProvider: React.FC<ObjectsProviderProps> = ({ children }) =>
         id: Date.now().toString(),
         title: objectData.title || '',
         description: objectData.description || '',
-        category: objectData.category || '',
+        categories: objectData.categories || '',
         status: 'encontrado',
         date: objectData.date || new Date().toISOString(),
         createdAt: new Date().toISOString(),
@@ -152,41 +156,22 @@ export const ObjectsProvider: React.FC<ObjectsProviderProps> = ({ children }) =>
     }
   };
 
-  const claimObject = async (id: string, message: string): Promise<void> => {
-    try {
-      if (!user) {
-        throw new Error('Usuario no autenticado');
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setObjects(prevObjects => 
-        prevObjects.map(obj => 
-          obj.id === id ? {
-            ...obj,
-            status: 'reclamado',
-            claimsCount: obj.claimsCount + 1,
-            claims: [...obj.claims, {
-              id: Date.now().toString(),
-              userId: user.id,
-              message,
-              date: new Date().toISOString()
-            }],
-            claimer: {
-              id: user.id,
-              name: user.fullName || '',
-              email: user.primaryEmailAddress?.emailAddress || '',
-              profileImage: user.imageUrl || '',
-              claimDate: new Date().toISOString(),
-              claimMessage: message
-            }
-          } : obj
-        )
-      );
-    } catch (error) {
-      console.error('Error claiming object:', error);
-      throw error;
+  const claimObject = async (objectId: string, message: string): Promise<void> => {
+    if (!user) throw new Error('Usuario no autenticado');
+    const token = await user.getToken?.();
+    const response = await fetch(`${import.meta.env.VITE_API_URL_BASE}/objetos/${objectId}/claims`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ message }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Error al reclamar el objeto');
     }
+    // Opcional: puedes actualizar el estado local si lo deseas
   };
 
   const reportObject = async (id: string, reason: Report['reason'], description?: string): Promise<void> => {
@@ -269,16 +254,18 @@ export const ObjectsProvider: React.FC<ObjectsProviderProps> = ({ children }) =>
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setObjects(prevObjects => 
-        prevObjects.map(obj => 
-          obj.id === objectId ? {
-            ...obj,
-            claims: obj.claims.filter(c => c.id !== claimId),
-            claimsCount: obj.claimsCount - 1,
-            status: obj.claims.length === 1 ? 'encontrado' : obj.status,
-            claimer: obj.claimer?.id === user.id ? undefined : obj.claimer
-          } : obj
+
+      setObjects(prevObjects =>
+        prevObjects.map(obj =>
+          obj.id === objectId
+            ? {
+                ...obj,
+                claims: obj.claims.filter(c => c.id !== claimId),
+                claimsCount: obj.claimsCount - 1,
+                status: obj.claims.length === 1 ? 'encontrado' : obj.status,
+                claimer: obj.claimer?.id === user.id ? undefined : obj.claimer
+              }
+            : obj
         )
       );
     } catch (error) {
@@ -288,11 +275,11 @@ export const ObjectsProvider: React.FC<ObjectsProviderProps> = ({ children }) =>
   };
 
   return (
-    <ObjectsContext.Provider 
-      value={{ 
-        objects, 
-        loading, 
-        error, 
+    <ObjectsContext.Provider
+      value={{
+        objects,
+        loading,
+        error,
         getObjectById,
         createObject,
         updateObject,

@@ -1,6 +1,6 @@
 export interface UserType {
   id: string;
-  name: string;
+  nombre: string;
   email: string;
   avatar?: string;
   joinDate?: string;
@@ -28,10 +28,10 @@ export interface ObjectType {
   id: string;
   title: string;
   description: string;
-  category: string;
+  categories: string;
   status: 'encontrado' | 'reclamado' | 'entregado';
   date: string;
-  createdAt: string;
+  created_at: string;
   location: string;
   coordinates: {
     lat: number;

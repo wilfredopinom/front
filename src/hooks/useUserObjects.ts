@@ -11,13 +11,23 @@ export const useUserObjects = () => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
+    // Log para depuración
+    // console.log('objectsLoading:', objectsLoading);
+    // console.log('objects:', objects);
+
     if (!objectsLoading) {
       if (user) {
-        // Filter objects that belong to the current user or were claimed by the user
-        const filteredObjects = objects.filter(object => 
-          object.publisher.id === user.id || 
-          (object.claimer && object.claimer.id === user.id)
-        );
+        // Debug logs para verificar los ids
+        // console.log('User ID:', user.id);
+        // console.log('Objects:', objects);
+console.log('Ejemplo de objeto:', objects[0]);
+        // Asegura que los ids existen y son strings antes de comparar
+        const filteredObjects = objects.filter(object => {
+          const publisherId = object.publisher?.id?.toString();
+          const claimerId = object.claimer?.id?.toString();
+          const userId = user.id?.toString();
+          return publisherId === userId || claimerId === userId;
+        });
         setUserObjects(filteredObjects);
       } else {
         setUserObjects([]);

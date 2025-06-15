@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ObjectType } from '../../types/ObjectType';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin } from 'lucide-react';
+
 
 // Fix for default marker icons in Leaflet
 const iconUrl = 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png';
@@ -86,12 +86,12 @@ const Map: React.FC<MapProps> = ({
       }).addTo(mapInstanceRef.current);
 
       // Add location control
-      const locationButton = L.control({ position: 'bottomright' });
+      const locationButton = new L.Control({ position: 'bottomright' } as L.ControlOptions);
       locationButton.onAdd = () => {
         const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
         div.innerHTML = `
           <button
-            class="glass-card p-2 rounded-lg text-blue-300 hover:text-blue-400 transition-colors duration-300"
+            class="glass-card p-2 rounded-lg text-blue-300 hover:text-blue-400 transition-colors duration-300 hover-glow"
             title="Mostrar mi ubicación"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -124,7 +124,7 @@ const Map: React.FC<MapProps> = ({
             <div class="p-2">
               <h3 class="font-semibold text-gray-900">${object.title}</h3>
               <p class="text-sm text-gray-600">${object.location}</p>
-              <p class="text-xs text-gray-500">${object.category}</p>
+              <p class="text-xs text-gray-500">${object.categories}</p>
               <a href="/objetos/${object.id}" class="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-block">
                 Ver detalles
               </a>
@@ -160,7 +160,7 @@ const Map: React.FC<MapProps> = ({
     if (userMarkerRef.current) allMarkers.push(userMarkerRef.current);
     
     if (allMarkers.length > 0) {
-      const group = new L.featureGroup(allMarkers);
+      const group = L.featureGroup(allMarkers);
       mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
     }
 
