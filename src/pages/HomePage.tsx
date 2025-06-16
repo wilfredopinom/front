@@ -5,7 +5,7 @@ import HeroImage from '../components/ui/HeroImage';
 import StatCard from '../components/ui/StatCard';
 import FeatureCard from '../components/ui/FeatureCard';
 import { useObjects } from '../hooks/useObjects';
-import StatusBadge from '../components/ui/StatusBadge';
+
 
 const HomePage: React.FC = () => {
   const { objects } = useObjects();
@@ -104,7 +104,7 @@ const HomePage: React.FC = () => {
                   {object.images && object.images.length > 0 && (
                     <div className="aspect-w-16 aspect-h-9">
                       <img
-                        src={object.images[0].url}
+                        src={object.images[0]}
                         alt={object.title}
                         className="w-full h-48 object-cover"
                       />
@@ -124,7 +124,7 @@ const HomePage: React.FC = () => {
                     
                     <div className="flex items-center justify-between">
                       <span className="glass-card px-2.5 py-0.5 rounded-full text-xs font-medium text-blue-300 hover-glow">
-                        {object.categories?.name || 'Sin categoría'}
+                        {object.categories || 'Sin categoría'}
                       </span>
                       
                       <span className={`glass-card px-2.5 py-0.5 rounded-full text-xs font-medium hover-glow ${

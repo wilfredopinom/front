@@ -1,4 +1,5 @@
 export interface UserType {
+  clerk_id: string;
   id: string;
   nombre: string;
   email: string;
@@ -25,7 +26,9 @@ export interface ContactInfo {
 }
 
 export interface ObjectType {
+  entregado_recuperado: boolean | null;
   id: string;
+  name: string;
   title: string;
   description: string;
   categories: string;

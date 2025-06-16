@@ -527,9 +527,24 @@ const ObjectDetailPage: React.FC = () => {
   };
 
   return (
-    <div style={backgroundStyle} className="min-h-screen w-full flex flex-col">
-      <div className="flex flex-col flex-grow relative z-10">
-        <main className="flex-grow">
+    <div className="min-h-screen w-full flex flex-col bg-transparent">
+      {/* Fondo fijo detrás, contenido con scroll */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 0,
+          width: '100vw',
+          height: '100vh',
+          background: backgroundStyle.background,
+          minHeight: backgroundStyle.minHeight,
+          minWidth: backgroundStyle.minWidth,
+          transition: backgroundStyle.transition,
+        }}
+        aria-hidden="true"
+      ></div>
+      <div className="flex flex-col flex-grow relative z-10" style={{ minHeight: '100vh' }}>
+        <main className="flex-grow overflow-y-auto" style={{ minHeight: 0 }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
             {/* Back Button */}
             <button
@@ -1118,8 +1133,13 @@ const ObjectDetailPage: React.FC = () => {
             )}
           </div>
         </main>
+        {/* Footer fijo abajo, ancho completo */}
+        <footer className="w-full mt-auto">
+          {/* Usa tu componente Footer si lo tienes, si no, puedes poner un placeholder */}
+          {/* <Footer /> */}
+          
+        </footer>
       </div>
-      
     </div>
     
   );

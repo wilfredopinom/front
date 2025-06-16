@@ -13,7 +13,7 @@ const LostObjectsByMonthPage: React.FC = () => {
     if (objects && monthId) {
       // Filtrar objetos por el mes seleccionado y que sean de comisarías
       const filtered = objects.filter(obj => {
-        const objectDate = new Date(obj.createdAt);
+        const objectDate = new Date(obj.created_at);
         const [year, month] = monthId.split('-');
         
         const isInMonth = monthId.includes('-') ?

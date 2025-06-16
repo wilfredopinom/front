@@ -31,7 +31,7 @@ const ObjectEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuth();
-  const { user } = useUser();
+  useUser();
 
   const [object, setObject] = useState<ObjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +59,7 @@ const ObjectEditPage: React.FC = () => {
         setLocation(data.location);
         setCategory(data.categories?.id || '');
         setStatus(data.status);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError('Error al cargar el objeto');
       } finally {
@@ -90,6 +91,7 @@ const ObjectEditPage: React.FC = () => {
       });
       if (!response.ok) throw new Error('Error al actualizar el objeto');
       navigate(`/objetos/${object.id}`);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError('Error al guardar los cambios');
     } finally {

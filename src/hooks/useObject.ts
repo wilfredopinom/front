@@ -3,7 +3,7 @@ import { useObjects } from './useObjects';
 import { ObjectType } from '../types/ObjectType';
 
 export const useObject = (id: string) => {
-  const { getObjectById, updateObject, claimObject: claimObjectContext } = useObjects();
+  const { getObjectById, claimObject: claimObjectContext } = useObjects();
   const [object, setObject] = useState<ObjectType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -32,7 +32,7 @@ export const useObjects = () => {
         if (msg.type === 'object_updated') {
           setObjects(prev => prev.map(obj => obj.id === msg.data.id ? msg.data : obj));
         }
-      } catch {}
+      } catch { /* empty */ }
     };
 
     return () => {

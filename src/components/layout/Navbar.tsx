@@ -116,7 +116,7 @@ const Navbar = () => {
                     }
                   >
                     <span className="flex items-center">
-                      <Plus className="w-4 h-4 mr-1" />
+                      <Plus className="w-4 h-4 mr-" />
                       Publicar
                     </span>
                   </NavLink>
@@ -130,7 +130,7 @@ const Navbar = () => {
                       tabIndex={0}
                       type="button"
                     >
-                      <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-blue-400 shadow-lg hover:shadow-xl transition-all duration-200 bg-blue-900/50 flex items-center justify-center">
+                      <div className="w-9  rounded-full overflow-hidden border-2 border-blue-400 shadow-lg hover:shadow-xl transition-all duration-200 bg-blue-900/50 flex items-center justify-center">
                         {userImageUrl ? (
                           <img
                             src={userImageUrl}
@@ -148,9 +148,9 @@ const Navbar = () => {
                         className="absolute right-0 mt-3 w-56 bg-[#04131D]/95 border border-white/10 rounded-xl shadow-xl z-[9999] py-2"
                         style={{ minWidth: 220 }}
                       >
-                        <div className="px-4 py-3 border-b border-white/10">
+                        <div className="px-1.5 py-2 border-b border-white/10">
                           <div className="flex items-center">
-                            <div className="h-9 w-12 rounded-full overflow-hidden border border-blue-400 mr-3 bg-blue-900/50">
+                            <div className="h-9 w-9  rounded-full overflow-hidden border border-blue-400 mr-3 bg-blue-900/50">
                               {userImageUrl ? (
                                 <img
                                   src={userImageUrl}

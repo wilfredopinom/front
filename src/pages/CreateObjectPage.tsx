@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, MapPin, X } from 'lucide-react';
-import Map from '../components/map/Map';
 import { useAuth } from "@clerk/clerk-react";
 
 const CreateObjectPage: React.FC = () => {
@@ -20,7 +19,7 @@ const CreateObjectPage: React.FC = () => {
   });
   
   const [images, setImages] = useState<string[]>([]);
-  const [coordinates, setCoordinates] = useState({ lat: 42.8806, lng: -8.5458 }); // Santiago de Compostela
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -60,14 +59,6 @@ const CreateObjectPage: React.FC = () => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
   
-  const handleMapClick = (lat: number, lng: number) => {
-    setCoordinates({ lat, lng });
-    // En vez de poner "Lat: ...", pon una URL de Google Maps o las coordenadas en formato "lat,lng"
-    setFormData(prev => ({
-      ...prev,
-      location: `${lat},${lng}`
-    }));
-  };
   
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
